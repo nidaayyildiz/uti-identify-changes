@@ -4,103 +4,135 @@ from typing import List, Optional, Union, Literal
 from sdks.novavision.src.base.model import Package, Image, Inputs, Configs, Outputs, Response, Request, Output, Input, Config
 
 
-class InputImage(Input):
-    name: Literal["inputImage"] = "inputImage"
-    value: Union[List[Image], Image]
+class InputData(Input):
+    name: Literal["inputData"] = "inputData"
+    value: Union[dict, list]
     type: str = "object"
 
     @validator("type", pre=True, always=True)
     def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
+        v = values.get("value")
+        if isinstance(v, list):
             return "list"
+        return "object"
 
     class Config:
-        title = "Image"
+        title = "Input Data"
 
-
-class OutputImage(Output):
-    name: Literal["outputImage"] = "outputImage"
-    value: Union[List[Image],Image]
+class OutputData(Output):
+    name: Literal["outputData"] = "outputData"
+    value: Union[dict, list]
     type: str = "object"
 
     @validator("type", pre=True, always=True)
     def set_type_based_on_value(cls, value, values):
-        value = values.get('value')
-        if isinstance(value, Image):
-            return "object"
-        elif isinstance(value, list):
+        v = values.get("value")
+        if isinstance(v, list):
             return "list"
+        return "object"
 
     class Config:
-        title = "Image"
+        title = "Output Data"
+
+class SmoothingFactor(Config):
+
+    name: Literal["SmoothingFactor"] = "SmoothingFactor"
+    value: float = Field(ge=0.0, default=10)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["[0.0, 1.0]"] = "[0.0, 1.0]"
+
+    class Config:
+        title = "Smoothing Factor"
+        json_schema_extra = {"shortDescription": "Factor for smoothing the data."}
+
+class Warmup(Config):
+
+    name: Literal["Warmup"] = "Warmup"
+    value: int = Field(ge=2, default=10)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["[2, ...]"] = "[2, ...]"
+
+    class Config:
+        title = "Warmup "
+        json_schema_extra = {"shortDescription": "Minimum samples collected before detection starts."}
+
+class WindowSize(Config):
+
+    name: Literal["WindowSize"] = "WindowSize"
+    value: int = Field(ge=2, default=10)
+    type: Literal["number"] = "number"
+    field: Literal["textInput"] = "textInput"
+    placeHolder: Literal["[2, ...]"] = "[2, ...]"
+
+    class Config:
+        title = "Window Size"
+        json_schema_extra = {"shortDescription": "Number of recent embeddings kept for comparison."}
 
 
-class KeepSideFalse(Config):
-    name: Literal["False"] = "False"
-    value: Literal[False] = False
+class EMA(Config):
+    name: Literal["EMA"] = "EMA"
+    smoothingFactor: SmoothingFactor
+    value: Literal["EMA"] = "EMA"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Disable"
+        title = "EMA"
 
 
-class KeepSideTrue(Config):
-    name: Literal["True"] = "True"
-    value: Literal[True] = True
+class SMA(Config):
+    name: Literal["SMA"] = "SMA"
+    windowSize: WindowSize
+    value: Literal["SMA"] = "SMA"
     type: Literal["bool"] = "bool"
     field: Literal["option"] = "option"
 
     class Config:
-        title = "Enable"
+        title = "SMA"
+
+class SlidingWindow(Config):
+    name: Literal["SlidingWindow"] = "SlidingWindow"
+    value: Literal["SlidingWindow"] = "SlidingWindow"
+    type: Literal["bool"] = "bool"
+    field: Literal["option"] = "option"
+
+    class Config:
+        title = "Sliding Window"
+
+    class Config:
+        title = "SMA"
 
 
-class KeepSideBBox(Config):
-    """
-        Rotate image without catting off sides.
-    """
+class IdentifyChangesStrategy(Config):
+
     name: Literal["KeepSide"] = "KeepSide"
-    value: Union[KeepSideTrue, KeepSideFalse]
+    value: Union[SMA, EMA, SlidingWindow]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
     class Config:
-        title = "Keep Sides"
+        title = "Strategy"
 
 
-class Degree(Config):
-    """
-        Positive angles specify counterclockwise rotation while negative angles indicate clockwise rotation.
-    """
-    name: Literal["Degree"] = "Degree"
-    value: int = Field(ge=-359.0, le=359.0,default=0)
-    type: Literal["number"] = "number"
-    field: Literal["textInput"] = "textInput"
-    placeHolder: Literal["[-359, 359]"] = "[-359, 359]"
 
-    class Config:
-        title = "Angle"
+class IdentifyChangesInputs(Inputs):
+    inputData: InputData
 
 
-class PackageInputs(Inputs):
-    inputImage: InputImage
+class IdentifyChangesConfigs(Configs):
+    warmup: Warmup
+    identifyChangesStrategy: IdentifyChangesStrategy
 
 
-class PackageConfigs(Configs):
-    degree: Degree
-    drawBBox: KeepSideBBox
+class IdentifyChangesOutputs(Outputs):
+    outputData: OutputData
 
 
-class PackageOutputs(Outputs):
-    outputImage: OutputImage
-
-
-class PackageRequest(Request):
-    inputs: Optional[PackageInputs]
-    configs: PackageConfigs
+class IdentifyChangesRequest(Request):
+    inputs: Optional[IdentifyChangesInputs]
+    configs: IdentifyChangesConfigs
 
     class Config:
         json_schema_extra = {
@@ -108,13 +140,13 @@ class PackageRequest(Request):
         }
 
 
-class PackageResponse(Response):
-    outputs: PackageOutputs
+class IdentifyChangesResponse(Response):
+    outputs: IdentifyChangesOutputs
 
 
-class PackageExecutor(Config):
-    name: Literal["Package"] = "Package"
-    value: Union[PackageRequest, PackageResponse]
+class IdentifyChangesExecutor(Config):
+    name: Literal["IdentifyChanges"] = "IdentifyChanges"
+    value: Union[IdentifyChangesRequest, IdentifyChangesResponse]
     type: Literal["object"] = "object"
     field: Literal["option"] = "option"
 
@@ -129,7 +161,7 @@ class PackageExecutor(Config):
 
 class ConfigExecutor(Config):
     name: Literal["ConfigExecutor"] = "ConfigExecutor"
-    value: Union[PackageExecutor]
+    value: Union[IdentifyChangesExecutor]
     type: Literal["executor"] = "executor"
     field: Literal["dependentDropdownlist"] = "dependentDropdownlist"
 
@@ -147,4 +179,4 @@ class PackageConfigs(Configs):
 class PackageModel(Package):
     configs: PackageConfigs
     type: Literal["component"] = "component"
-    name: Literal["Package"] = "Package"
+    name: Literal["IdentifyChanges"] = "IdentifyChanges"
