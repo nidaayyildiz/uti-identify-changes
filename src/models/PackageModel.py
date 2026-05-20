@@ -101,8 +101,7 @@ class SlidingWindow(Config):
     class Config:
         title = "Sliding Window"
 
-    class Config:
-        title = "Sliding Window"
+
 
 
 class IdentifyChangesStrategy(Config):
