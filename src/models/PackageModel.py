@@ -37,7 +37,7 @@ class OutputData(Output):
 class SmoothingFactor(Config):
 
     name: Literal["SmoothingFactor"] = "SmoothingFactor"
-    value: float = Field(ge=0.0, default=10)
+    value: float = Field(ge=0.0, le=1.0, default=0.05)
     type: Literal["number"] = "number"
     field: Literal["textInput"] = "textInput"
     placeHolder: Literal["[0.0, 1.0]"] = "[0.0, 1.0]"
@@ -107,7 +107,7 @@ class SlidingWindow(Config):
 
 class IdentifyChangesStrategy(Config):
 
-    name: Literal["KeepSide"] = "KeepSide"
+    name: Literal["IdentifyChangesStrategy"] = "IdentifyChangesStrategy"
     value: Union[SMA, EMA, SlidingWindow]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
