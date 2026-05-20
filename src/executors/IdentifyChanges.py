@@ -15,13 +15,18 @@ from components.Package.src.utils.response import build_response
 from components.Package.src.models.PackageModel import PackageModel
 
 
-class Package(Component):
+class IdentifyChanges(Component):
     def __init__(self, request, bootstrap):
         super().__init__(request, bootstrap)
         self.request.model = PackageModel(**(self.request.data))
-        self.rotation_degree = self.request.get_param("Degree")
-        self.keep_side = self.request.get_param("KeepSide")
-        self.image = self.request.get_param("inputImage")
+        self.input_data = self.request.get_param("inputData")
+        self.smoothing_factor = float(self.request.get_param("SmoothingFactor") or 0.05)
+        self.warmup = int(self.request.get_param("Warmup") or 10)
+        self.window_size = int(self.request.get_param("WindowSize") or 10)
+        self.identify_changes_strategy = self.request.get_param("IdentifyChangesStrategy")
+
+        
+        self.output_data = []
 
     @staticmethod
     def bootstrap(config: dict) -> dict:
