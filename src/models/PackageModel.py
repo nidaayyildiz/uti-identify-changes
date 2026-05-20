@@ -107,7 +107,7 @@ class SlidingWindow(Config):
 class IdentifyChangesStrategy(Config):
 
     name: Literal["IdentifyChangesStrategy"] = "IdentifyChangesStrategy"
-    value: Union[SMA, EMA, SlidingWindow]
+    value: Union[EMA, SMA, SlidingWindow]
     type: Literal["object"] = "object"
     field: Literal["dropdownlist"] = "dropdownlist"
 
