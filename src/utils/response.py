@@ -1,5 +1,5 @@
 from sdks.novavision.src.helper.package import PackageHelper
-from components.Package.src.models.PackageModel import IdentifyChangesOutputs, IdentifyChangesResponse, OutputData, PackageModel, PackageConfigs, ConfigExecutor, IdentifyChangesExecutor
+from components.IdentifyChanges.src.models.PackageModel import IdentifyChangesOutputs, IdentifyChangesResponse, OutputData, PackageModel, PackageConfigs, ConfigExecutor, IdentifyChangesExecutor
 
 
 def build_response(context):
